@@ -1,0 +1,25 @@
+version: '3.4'
+services:
+  web:
+    build: .
+
+  redis:
+    image: redis
+    volumes:
+     - ${VOL_ID}.redis:/data
+
+  mysql:
+    image: mysql
+    volumes:
+     - ${VOL_ID}.mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: insecureroot
+
+volumes:
+  ciexample.redis:
+    driver: dm
+    name: ${VOL_ID}.redis
+  ciexample.mysql:
+    driver: dm
+    name: ${VOL_ID}.mysql
+

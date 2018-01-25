@@ -1,0 +1,9 @@
+version: '3'
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      TEST_URL: http://web:80/
+

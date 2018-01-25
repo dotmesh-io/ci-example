@@ -1,0 +1,8 @@
+FROM alpine:3.6
+
+RUN apk --update add curl
+
+COPY test.sh /app/test
+
+CMD /app/test
+
