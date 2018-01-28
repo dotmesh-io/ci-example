@@ -1,0 +1,31 @@
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.18.0
+    - BUILD_ID="${TRAVIS_COMMIT}"
+    - VOL_ID="${TRAVIS_COMMIT}"
+    - REMOTE_ID="ciexample/ci-example"
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  # install the dm CLI
+  - sudo curl -L -o /usr/local/bin/dm https://get.dotmesh.io/$(uname -s)/dm
+  - sudo chmod +x /usr/local/bin/dm
+  # install appropriate version of docker-compose
+  - sudo rm /usr/local/bin/docker-compose
+  - sudo curl -L -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m`
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+before_script:
+  - dm cluster init
+  - echo $DOTHUB_KEY | $DM remote add dothub $DOTHUB_USER
+
+script:
+  - make test
+
+after_script:
+  - dm switch ${VOL_ID} && dm commit -m "CI run $(date)" && dm push dothub --remote-name ${REMOTE_ID}
+
