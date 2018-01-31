@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 
 ###
 # 
@@ -34,5 +35,6 @@ curl -X POST --data "1234:99" $TEST_PATH
 
 [ -n "$FAIL" ] && exit 1
 
+exit 0
 
 

@@ -1,9 +1,12 @@
-version: '3'
+version: '3.4'
 services:
   test:
     build:
-      context: .
+      context: ./test
       dockerfile: Dockerfile.test
     environment:
       TEST_URL: http://web:80/
+    depends_on:
+      - web
+
 

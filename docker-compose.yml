@@ -6,12 +6,12 @@ services:
   redis:
     image: redis
     volumes:
-     - ${VOL_ID}.redis:/data
+     - ciexample.redis:/redis
 
   mysql:
     image: mysql
     volumes:
-     - ${VOL_ID}.mysql:/var/lib/mysql
+     - ciexample.mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: insecureroot
 

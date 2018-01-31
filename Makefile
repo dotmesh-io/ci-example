@@ -7,8 +7,8 @@ BUILD_ID ?= $(shell basename ${PWD})
 VOL_ID ?= ciexample
 
 build:
-	$(COMPOSE_TEST) -p $(BUILD_NUMBER) build
+	$(COMPOSE_TEST) -p $(BUILD_ID) build
 
 test:
-	$(COMPOSE_TEST) -p $(BUILD_NUMBER) run test
+	$(COMPOSE_TEST) -p $(BUILD_ID) run test
 

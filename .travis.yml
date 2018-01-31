@@ -3,7 +3,7 @@ env:
     - DOCKER_COMPOSE_VERSION=1.18.0
     - BUILD_ID="${TRAVIS_COMMIT}"
     - VOL_ID="${TRAVIS_COMMIT}"
-    - REMOTE_ID="ciexample/ci-example"
+    - REMOTE_ID="ci-example"
 
 sudo: required
 
@@ -21,11 +21,11 @@ before_install:
 
 before_script:
   - dm cluster init
-  - echo $DOTHUB_KEY | $DM remote add dothub $DOTHUB_USER
+  - echo $DOTHUB_KEY | dm remote add dothub $DOTHUB_USER
 
 script:
   - make test
 
 after_script:
-  - dm switch ${VOL_ID} && dm commit -m "CI run $(date)" && dm push dothub --remote-name ${REMOTE_ID}
+  - dm switch ${VOL_ID} && dm commit -m "CI run $(date)" && dm push dothub --remote-name ${DOTHUB_USER%@*}/${REMOTE_ID}
 

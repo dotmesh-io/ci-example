@@ -1,37 +1,75 @@
-var http = require('http')
-var args = require('minimist')(process.argv, {
-  alias:{
-    p:'port',
-    r:'redis_host',
-    v:'verbose'
-  },
-  default:{
-    port:80
-  },
-  boolean:['verbose']
-})
+const http = require('http'),
+  concat = require('concat-stream'),
+  Router = require('routes-router'),
+  ecstatic = require('ecstatic'),
+  args = require('minimist')(process.argv, {
+    alias:{
+      p:'port',
+      r:'redis_host',
+      v:'verbose'
+    },
+    default:{
+      port:80
+    },
+    boolean:['verbose']
+  })
+;
 
-var RedisServer = require('./server')
-var PostgresServer = require('./server-postgres')
+const
+  router = Router(),
+  fileServer = ecstatic({ root: __dirname + '/client' }),
+  RedisServer = require('./server/redis'),
+  PostgresServer = require('./server/postgres');
 
 // if any of these are set - then we use the postgres server
-var postresEnvVars = [
+const postgresEnvVars = [
   'USE_POSTGRES_PORT',
   'USE_POSTGRES_HOST',
   'POSTGRES_USER',
   'POSTGRES_PASSWORD'
-]
+];
 
-var useServer = RedisServer
+var dbDriver = RedisServer;
 
-postresEnvVars.forEach(function(varName){
+postgresEnvVars.forEach(function(varName){
   if(process.env[varName]){
-    useServer = PostgresServer
+    dbDriver = PostgresServer;
   }
-})
+});
 
-var server = http.createServer(useServer(args))
+const db = dbDriver(args);
+
+
+router.addRoute("/v1/ping", {
+  GET: function(req, res){
+    res.setHeader('Content-type', 'application/json');
+    res.end(JSON.stringify({
+      connected: db.connectionStatus()
+    }));
+  }
+});
+
+router.addRoute("/v1/whales", {
+  GET: function (req, res) {
+    db.get( (err, data) => {
+      res.setHeader('Content-type', 'application/json');
+      res.end(JSON.stringify(data));
+    });
+  },
+  POST: function (req, res) {
+    req.pipe(concat(function(data){
+      data = data.toString();
+      db.put(data, () => {
+        res.end('ok');
+      });
+    }));
+  }
+});
+
+router.addRoute("/*", fileServer);
+
+var server = http.createServer(router);
 
 server.listen(args.port, function(){
-  console.log('server listening on port: ' + args.port)
-})
+  console.log('server listening on port: ' + args.port);
+});
